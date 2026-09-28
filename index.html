@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Agua - Juriquilla</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: -0.5px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #86868b;
+            display: block;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        input {
+            width: 100%;
+            border: none;
+            background: #f5f5f7;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            outline: none;
+            font-weight: 600;
+        }
+        .result-zone {
+            text-align: center;
+            padding: 25px;
+            border-radius: 24px;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .bg-green { background: #34c759; }
+        .bg-red { background: #ff3b30; }
+        .bg-orange { background: #ff9500; }
+        .price {
+            font-size: 44px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        .status-msg {
+            font-size: 15px;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+        .tips h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 0;
+        }
+        .tips ul {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 14px;
+            color: #515154;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Consumo de Agua Juriquilla</h1>
+    
+    <div class="card">
+        <label for="consumo">Ingresa tu Consumo Mensual (m³)</label>
+        <input type="number" id="consumo" placeholder="Ej. 9" min="0" oninput="calcular()">
+    </div>
+
+    <div id="alertBox" class="result-zone bg-green">
+        <div id="statusTitle" style="font-size: 13px; text-transform: uppercase; tracking-spacing: 1px;">Zona de Consumo Ideal</div>
+        <div class="price" id="costoDisplay">$259.00</div>
+        <div class="status-msg" id="statusDesc">Manteniéndote debajo de 9.99 m³ aseguras la tarifa más baja y económica de la red.</div>
+    </div>
+
+    <div class="card tips">
+        <h3 id="tipsTitle">💡 Estrategia para mantener el recibo bajo</h3>
+        <ul id="tipsList">
+            <li><strong>Revisión semanal:</strong> Monitorea tu medidor físico los días 1 y 15 para evitar sorpresas.</li>
+            <li><strong>Alerta de Toma General:</strong> Si tu consumo doméstico no cambió pero el recibo subió, exige a la administración revisar fugas en las áreas comunes.</li>
+            <li><strong>Fugas en WC:</strong> Una filtración silenciosa en la caja del baño puede gastar hasta 2 m³ adicionales al mes.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function calcular() {
+    let m3 = parseFloat(document.getElementById('consumo').value);
+    if (isNaN(m3) || m3 < 0) m3 = 0;
+    
+    let costo = 259;
+    let box = document.getElementById('alertBox');
+    let sTitle = document.getElementById('statusTitle');
+    let sDesc = document.getElementById('statusDesc');
+    
+    // Cálculo basado en la fórmula matemática calibrada
+    if (m3 === 0) {
+        costo = 259;
+    } else if (m3 <= 9) {
+        costo = 259 + (m3 * 13.5);
+    } else if (m3 <= 12) {
+        costo = 380.5 + ((m3 - 9) * 25.17);
+    } else if (m3 <= 21) {
+        costo = 456 + ((m3 - 12) * 12.22);
+    } else {
+        costo = 566 + ((m3 - 21) * 21.2);
+    }
+
+    document.getElementById('costoDisplay').innerText = '$' + costo.toFixed(2) + ' MXN';
+
+    // Manejo dinámico de Alertas visuales Apple-Style
+    if (m3 <= 9.999) {
+        box.className = "result-zone bg-green";
+        sTitle.innerText = "Zona de Consumo Ideal";
+        sDesc.innerText = "¡Excelente! Manteniéndote por debajo de los 10 m³ aseguras el costo unitario más bajo del fraccionamiento.";
+    } else if (m3 >= 10 && m3 <= 12.99) {
+        box.className = "result-zone bg-red";
+        sTitle.innerText = "⚠️ Zona de Peligro Tarifario";
+        sDesc.innerText = "¡Cuidado! Entraste al rango de penalización exprés (10 a 12.99 m³). El costo de tus metros extra se duplicó bruscamente.";
+    } else if (m3 > 12.99 && m3 <= 21) {
+        box.className = "result-zone bg-orange";
+        sTitle.innerText = "Zona de Consumo Moderado Alta";
+        sDesc.innerText = "Tu consumo se encuentra en el rango medio familiar. Evita subir al siguiente escalón para no disparar el cobro.";
+    } else {
+        box.className = "result-zone bg-red";
+        sTitle.innerText = "🚨 Alerta: Consumo Excesivo";
+        sDesc.innerText = "Superaste los 21 m³. A partir de este punto, cada metro extra se cobra con la penalización más alta de Agua de Juriquilla.";
+    }
+}
+</script>
+</body>
+</html>
